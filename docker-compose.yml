@@ -1,0 +1,50 @@
+version: '3.3'
+
+services:
+  app:
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+    container_name: test_app
+    restart: always
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    networks:
+      - app-network
+    
+  nginx:
+    # image: nginx:1.19-alpine
+    build: 
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: test_nginx
+    restart: always
+    ports:
+      - 8004:80
+    volumes:
+      - ./:/var/www
+      - ./nginx:/etc/nginx/conf.d
+    networks:
+      - app-network
+    
+  #MySQL Service
+  db:
+    image: mysql:latest
+    container_name: db
+    restart: always
+    tty: true
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: test_php
+      MYSQL_ROOT_PASSWORD: MYSQL_ROOT_PASSWORD
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    networks:
+      - app-network
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
